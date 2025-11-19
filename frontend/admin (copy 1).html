@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SRMS Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    :root {
+        --bg: #0e141b;
+        --card: #18222d;
+        --accent: #00bcd4;
+        --danger: #ef5350;
+        --success: #4caf50;
+        --text: #e8e8e8;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    /* LOGIN SCREEN */
+    #loginPage {
+        display: flex;
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .login-box {
+        background: var(--card);
+        padding: 25px;
+        width: 320px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0,255,255,0.2);
+        text-align: center;
+    }
+
+    .login-box input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        margin: 8px 0;
+        font-size: 15px;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+        font-size: 16px;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .btn-login {
+        background: var(--accent);
+    }
+    .btn-danger { background: var(--danger); }
+    .btn-success { background: var(--success); }
+
+    /* DASHBOARD */
+    #dashboardPage {
+        display: none;
+        padding: 25px;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+
+    .section-card {
+        background: var(--card);
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,255,255,0.1);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #394957;
+    }
+
+    th {
+        background: #111b25;
+    }
+
+    .logout-btn {
+        float: right;
+        margin-bottom: 20px;
+        background: var(--danger);
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .delete-btn {
+        background: var(--danger);
+        color: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        border: none;
+    }
+
+    /* TOAST */
+    .toast {
+        position: fixed;
+        bottom: 18px;
+        right: 18px;
+        background: #222;
+        padding: 10px 16px;
+        border-radius: 8px;
+        color: white;
+        opacity: 0;
+        transition: 0.3s;
+        pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+</style>
+
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<section id="loginPage">
+    <div class="login-box">
+        <h2>Admin Login</h2>
+        <input id="username" placeholder="Username">
+        <input id="password" type="password" placeholder="Password">
+        <button class="btn btn-login" onclick="login()">Login</button>
+        <p id="loginError" style="color:#ef5350; display:none;">Invalid credentials</p>
+    </div>
+</section>
+
+<!-- DASHBOARD PAGE -->
+<section id="dashboardPage">
+    <div class="logout-btn" onclick="logout()">Logout</div>
+
+    <h2>SRMS Admin Dashboard</h2>
+
+    <!-- ORDERS SECTION -->
+    <div class="section-card">
+        <h3>Orders</h3>
+        <table id="ordersTable">
+            <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Total (AED)</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </table>
+    </div>
+
+    <!-- RESERVATIONS SECTION -->
+    <div class="section-card">
+        <h3>Reservations</h3>
+        <table id="resTable">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Size</th>
+                <th>Action</th>
+            </tr>
+        </table>
+    </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const API = "http://127.0.0.1:5000";
+let token = localStorage.getItem("admin_token");
+
+// Toast
+function toast(msg){
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"), 2000);
+}
+
+// Login
+async function login(){
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    const res = await fetch(`${API}/api/admin/login`, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({username, password})
+    });
+
+    if (!res.ok){
+        document.getElementById("loginError").style.display = "block";
+        return;
+    }
+
+    const data = await res.json();
+    token = data.token;
+    localStorage.setItem("admin_token", token);
+    showDashboard();
+}
+
+// Logout
+function logout(){
+    localStorage.removeItem("admin_token");
+    token = null;
+    location.reload();
+}
+
+// Show dashboard after login
+function showDashboard(){
+    document.getElementById("loginPage").style.display="none";
+    document.getElementById("dashboardPage").style.display="block";
+    loadOrders();
+    loadReservations();
+}
+
+// Load Orders
+async function loadOrders(){
+    const table = document.getElementById("ordersTable");
+    table.innerHTML = `
+        <tr><th>ID</th><th>Customer</th><th>Total (AED)</th><th>Status</th><th>Action</th></tr>
+    `;
+
+    const res = await fetch(`${API}/api/orders`);
+    const data = await res.json();
+
+    data.orders.forEach(o=>{
+        table.innerHTML += `
+            <tr>
+                <td>${o.id}</td>
+                <td>${o.customer_name}</td>
+                <td>${o.total}</td>
+                <td>${o.status}</td>
+                <td><button class="delete-btn" onclick="deleteOrder(${o.id})">Delete</button></td>
+            </tr>`;
+    });
+}
+
+// Load Reservations
+async function loadReservations(){
+    const table = document.getElementById("resTable");
+    table.innerHTML = `
+        <tr><th>ID</th><th>Name</th><th>Date</th><th>Time</th><th>Size</th><th>Action</th></tr>
+    `;
+
+    const res = await fetch(`${API}/api/reservations`);
+    const data = await res.json();
+
+    data.reservations.forEach(r=>{
+        table.innerHTML += `
+            <tr>
+                <td>${r.id}</td>
+                <td>${r.name}</td>
+                <td>${r.date}</td>
+                <td>${r.time}</td>
+                <td>${r.size}</td>
+                <td><button class="delete-btn" onclick="deleteReservation(${r.id})">Delete</button></td>
+            </tr>`;
+    });
+}
+
+// Delete Order
+async function deleteOrder(id){
+    const res = await fetch(`${API}/api/orders/${id}`, {
+        method:"DELETE",
+        headers:{ "Authorization": "Bearer " + token }
+    });
+
+    if(res.ok){
+        toast("Order deleted");
+        loadOrders();
+    }
+}
+
+// Delete Reservation
+async function deleteReservation(id){
+    const res = await fetch(`${API}/api/reservations/${id}`, {
+        method:"DELETE",
+        headers:{ "Authorization": "Bearer " + token }
+    });
+
+    if(res.ok){
+        toast("Reservation deleted");
+        loadReservations();
+    }
+}
+
+// Auto-login if token saved
+if(token){ showDashboard(); }
+
+</script>
+
+</body>
+</html>

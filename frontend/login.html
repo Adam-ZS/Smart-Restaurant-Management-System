@@ -1,0 +1,19 @@
+fetch("http://127.0.0.1:5000/api/auth/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ username, password })
+})
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      // store role and username in localStorage
+      localStorage.setItem("srms_role", data.role);
+      localStorage.setItem("srms_username", data.username);
+
+      if (data.role === "ADMIN") window.location.href = "admin.html";
+      else if (data.role === "WAITER") window.location.href = "waiter.html";
+      else if (data.role === "CHEF") window.location.href = "kitchen.html";
+    } else {
+      alert("Invalid credentials");
+    }
+  });

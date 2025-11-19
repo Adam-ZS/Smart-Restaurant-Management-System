@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SRMS – Smart Restaurant</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f2f4f8;
+    }
+
+    header {
+        background: #1b2a41;
+        padding: 20px;
+        color: white;
+        text-align: center;
+        font-size: 26px;
+    }
+
+    nav {
+        margin-top: 15px;
+    }
+
+    nav button {
+        padding: 10px 18px;
+        margin: 5px;
+        border: none;
+        border-radius: 8px;
+        background: #2196f3;
+        color: white;
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    nav button:hover {
+        background: #0b7dda;
+    }
+
+    .page {
+        display: none;
+        padding: 25px;
+    }
+
+    .active {
+        display: block;
+    }
+
+    /* ----------- MENU ------------ */
+
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .menu-card {
+        background: white;
+        padding: 12px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        transition: 0.2s;
+    }
+    .menu-card:hover {
+        transform: scale(1.03);
+    }
+
+    .menu-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .menu-card h3 {
+        margin: 10px 0 3px 0;
+    }
+
+    .menu-card button {
+        width: 100%;
+        padding: 10px;
+        background:#4caf50;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        margin-top: 8px;
+        cursor: pointer;
+    }
+
+    /* ----------- CART ------------ */
+
+    .cart-item {
+        background: white;
+        padding: 12px;
+        border-radius: 10px;
+        margin: 12px 0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .remove-btn {
+        background: #e53935;
+        padding: 4px 10px;
+        color: white;
+        border: none;
+        float: right;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    /* ----------- RESERVATIONS ------------ */
+
+    .reservation-form input {
+        width: 100%;
+        padding: 10px;
+        margin: 6px 0;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+    }
+
+    .reservation-form button {
+        width: 100%;
+        padding: 12px;
+        background: #2196f3;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .reservation-box {
+        margin-top: 20px;
+    }
+
+    .reservation-entry {
+        background: white;
+        padding: 12px;
+        border-radius: 12px;
+        margin: 10px 0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    /* ----------- ANALYTICS ------------ */
+
+    .analytics-box {
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        max-width: 600px;
+        margin: auto;
+    }
+</style>
+
+</head>
+<body>
+
+<header>
+    Smart Restaurant Management System (SRMS)
+    <nav>
+        <button onclick="showPage('menuPage')">Menu</button>
+        <button onclick="showPage('cartPage')">Cart</button>
+        <button onclick="showPage('reservationPage')">Reservations</button>
+        <button onclick="showPage('analyticsPage')">Analytics</button>
+    </nav>
+</header>
+
+<!-- MENU PAGE -->
+<section id="menuPage" class="page active">
+    <h2>Smart Menu</h2>
+    <div id="menuGrid" class="menu-grid"></div>
+</section>
+
+<!-- CART PAGE -->
+<section id="cartPage" class="page">
+    <h2>Your Cart</h2>
+    <div id="cartItems"></div>
+    <h3>Total: AED <span id="cartTotal">0</span></h3>
+</section>
+
+<!-- RESERVATIONS PAGE -->
+<section id="reservationPage" class="page">
+    <h2>Table Reservation</h2>
+    <div class="reservation-form">
+        <input id="resName" type="text" placeholder="Full Name">
+        <input id="resDate" type="date">
+        <input id="resTime" type="time">
+        <input id="resSize" type="number" min="1" placeholder="Party Size">
+        <button onclick="submitReservation()">Confirm Reservation</button>
+    </div>
+
+    <h3>Upcoming Reservations</h3>
+    <div id="reservationList" class="reservation-box"></div>
+</section>
+
+<!-- ANALYTICS PAGE -->
+<section id="analyticsPage" class="page">
+    <h2>Analytics Dashboard</h2>
+    <div class="analytics-box">
+        <p><b>Top Selling Items:</b></p>
+        <ul id="analyticsList"></ul>
+        <p><i>Machine Learning (CF) Model: ACTIVE</i></p>
+    </div>
+</section>
+
+<script>
+// PAGE SWITCHER
+function showPage(pageId) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId).classList.add("active");
+}
+
+// --------------------------------------------------
+// MENU DATA WITH IMAGES
+// --------------------------------------------------
+const MENU = [
+    { id: 1, name: "Karak Tea", price: 6, img: "https://foodess.com/wp-content/uploads/2024/02/Karak-Chai-4.jpg" },
+    { id: 2, name: "Pizza", price: 32, img: "https://assets.surlatable.com/m/15a89c2d9c6c1345/72_dpi_webp-REC-283110_Pizza.jpg" },
+    { id: 3, name: "Chicken Biryani", price: 28, img: "https://www.cubesnjuliennes.com/wp-content/uploads/2020/01/Chicken-Biryani.jpg" },
+    { id: 4, name: "Rice Plate", price: 15, img: "https://www.allrecipes.com/thmb/TS7Hb4x4owg8zzyTMYhGi739OI0=/750x0/filters:no_upscale():max_bytes(150000):strip_icc()/microwave-rice-ddmfs-2x3-25-010ae39399ca44d184b57849af4059ad.jpg" },
+    { id: 5, name: "Mandi", price: 30, img: "https://cdn.prod.website-files.com/5fe870209b4f367ca43b8b48/6913130abb97dd483dbd5f6b_pexels-i-own-my-food-art-76108785-8994586.jpg" },
+    { id: 6, name: "French Fries", price: 12, img: "https://www.recipetineats.com/tachyon/2022/09/Fries-with-rosemary-salt_1.jpg?resize=900%2C1125&zoom=0.72" },
+    { id: 7, name: "Chocolate Cake", price: 22, img: "https://sallysbakingaddiction.com/wp-content/uploads/2013/04/triple-chocolate-cake-4.jpg" }
+];
+
+// RENDER MENU
+function loadMenu() {
+    const grid = document.getElementById("menuGrid");
+    MENU.forEach(item => {
+        grid.innerHTML += `
+            <div class="menu-card">
+                <img src="${item.img}">
+                <h3>${item.name}</h3>
+                <p>AED ${item.price}</p>
+                <button onclick="addToCart(${item.id})">Add to Cart</button>
+            </div>
+        `;
+    });
+}
+loadMenu();
+
+// --------------------------------------------------
+// CART SYSTEM
+// --------------------------------------------------
+let cart = [];
+
+function addToCart(id) {
+    const item = MENU.find(m => m.id === id);
+    cart.push(item);
+    renderCart();
+}
+
+function removeFromCart(i) {
+    cart.splice(i, 1);
+    renderCart();
+}
+
+function renderCart() {
+    const list = document.getElementById("cartItems");
+    list.innerHTML = "";
+    let total = 0;
+
+    cart.forEach((item, i) => {
+        total += item.price;
+        list.innerHTML += `
+            <div class="cart-item">
+                ${item.name} — AED ${item.price}
+                <button class="remove-btn" onclick="removeFromCart(${i})">X</button>
+            </div>
+        `;
+    });
+
+    document.getElementById("cartTotal").innerText = total;
+}
+
+// --------------------------------------------------
+// RESERVATIONS SYSTEM
+// --------------------------------------------------
+let reservations = [];
+
+function submitReservation() {
+    const r = {
+        name: document.getElementById("resName").value,
+        date: document.getElementById("resDate").value,
+        time: document.getElementById("resTime").value,
+        size: document.getElementById("resSize").value
+    };
+
+    reservations.push(r);
+    renderReservations();
+}
+
+function renderReservations() {
+    const list = document.getElementById("reservationList");
+    list.innerHTML = "";
+
+    reservations.forEach(r => {
+        list.innerHTML += `
+            <div class="reservation-entry">
+                <b>${r.name}</b><br>
+                ${r.date} at ${r.time}<br>
+                Party of ${r.size}
+            </div>
+        `;
+    });
+}
+
+// --------------------------------------------------
+// ANALYTICS (Simple CF Mock)
+// --------------------------------------------------
+function analytics() {
+    const counter = {};
+    cart.forEach(i => {
+        counter[i.name] = (counter[i.name] || 0) + 1;
+    });
+
+    const sorted = Object.keys(counter).sort((a, b) => counter[b] - counter[a]);
+
+    const list = document.getElementById("analyticsList");
+    list.innerHTML = "";
+
+    sorted.forEach(item => list.innerHTML += `<li>${item}</li>`);
+}
+
+setInterval(analytics, 1000);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Waiter Panel</title>
+<style>
+body { font-family: Arial; padding: 30px; background: #f4f4f4; }
+h1 { color: #333; }
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+.item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+}
+.cart {
+    margin-top: 25px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+button {
+    padding: 8px 15px;
+    border: none;
+    background: #1e88e5;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Waiter Order System (Dine-In)</h1>
+
+<label>Table Number:</label>
+<input id="table" placeholder="T3" style="padding:5px">
+
+<h2>Menu</h2>
+<div class="menu-grid" id="menu"></div>
+
+<h2>Cart</h2>
+<div class="cart" id="cart"></div>
+
+<button onclick="submitOrder()">Submit Order</button>
+
+<script>
+let CART = [];
+
+function loadMenu() {
+    fetch("http://127.0.0.1:5000/api/menu")
+        .then(r => r.json())
+        .then(data => {
+            const out = document.getElementById("menu");
+            out.innerHTML = "";
+            data.menu.forEach(m => {
+                out.innerHTML += `
+                    <div class="item" onclick='addToCart(${JSON.stringify(m)})'>
+                        <img src="${m.img}" width="100%">
+                        <h3>${m.name}</h3>
+                        <p>${m.price} AED</p>
+                    </div>
+                `;
+            });
+        });
+}
+
+function addToCart(item) {
+    CART.push({ ...item, qty: 1 });
+    renderCart();
+}
+
+function renderCart() {
+    const out = document.getElementById("cart");
+    out.innerHTML = CART.map(i => `${i.qty}× ${i.name} - ${i.price} AED`).join("<br>");
+}
+
+function submitOrder() {
+    const table = document.getElementById("table").value;
+
+    fetch("http://127.0.0.1:5000/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            customer_name: "Table " + table,
+            type: "DINE_IN",
+            table_number: table,
+            items: CART
+        })
+    })
+    .then(r => r.json())
+    .then(d => {
+        alert("Order sent! Order ID = " + d.id);
+        CART = [];
+        renderCart();
+    });
+}
+
+loadMenu();
+</script>
+</body>
+</html>

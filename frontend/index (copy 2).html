@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SRMS – Smart Restaurant</title>
+
+    <style>
+        :root {
+            --primary: #1b2a41;
+            --accent: #2196f3;
+            --accent-soft: #e3f2fd;
+            --success: #4caf50;
+            --danger: #e53935;
+            --bg: #f2f4f8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--bg);
+            color: #222;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1b2a41, #122033);
+            padding: 16px 20px 12px 20px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #ffc107;
+        }
+
+        .status-pill {
+            font-size: 12px;
+            background: rgba(255,255,255,0.12);
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+
+        nav {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        nav button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.12);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        nav button.active-tab {
+            background: #ffc107;
+            color: #122033;
+            font-weight: bold;
+        }
+
+        main {
+            padding: 22px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        /* ------- MENU GRID ------- */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 18px;
+            margin-top: 16px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .menu-card-body {
+            padding: 10px 12px 12px 12px;
+        }
+
+        .menu-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .badge {
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+        }
+
+        .menu-card p {
+            margin: 6px 0 0 0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .menu-card button {
+            width: 100%;
+            padding: 9px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            margin-top: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .menu-card button:hover {
+            opacity: 0.9;
+        }
+
+        /* ------- CART ------- */
+        .cart-container {
+            max-width: 600px;
+        }
+
+        .cart-item {
+            background: white;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-item-title {
+            font-weight: 500;
+        }
+
+        .cart-item small {
+            color: #555;
+        }
+
+        .remove-btn {
+            background: var(--danger);
+            padding: 5px 9px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .cart-summary {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .primary-btn {
+            background: var(--accent);
+            border-radius: 999px;
+            border: none;
+            color: white;
+            padding: 10px 18px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .primary-btn:disabled {
+            background: #9e9e9e;
+            cursor: not-allowed;
+        }
+
+        /* ------- RESERVATIONS ------- */
+        .reservation-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 800px) {
+            .reservation-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 16px;
+            border-radius: 14px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+        }
+
+        .reservation-form input {
+            width: 100%;
+            padding: 9px;
+            margin: 6px 0;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .reservation-form button {
+            width: 100%;
+            padding: 10px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .reservation-entry {
+            background: #fafafa;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin: 8px 0;
+            border-left: 4px solid var(--accent);
+            font-size: 14px;
+        }
+
+        /* ------- ANALYTICS ------- */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+
+        .analytics-card {
+            background: white;
+            padding: 14px;
+            border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.12);
+        }
+
+        .analytics-card h3 {
+            margin: 0 0 6px 0;
+            font-size: 15px;
+        }
+
+        .analytics-card p {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .analytics-list li {
+            margin-bottom: 4px;
+        }
+
+        /* ------- TOAST ------- */
+        .toast {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: #323232;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+            transform: translateY(10px);
+            z-index: 999;
+        }
+
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="top-bar">
+        <div class="logo">
+            SRMS <span>Smart Restaurant</span>
+        </div>
+        <div class="status-pill" id="healthStatus">
+            Backend: checking...
+        </div>
+    </div>
+    <nav>
+        <button class="active-tab" onclick="showPage('menuPage', this)">Menu</button>
+        <button onclick="showPage('cartPage', this)">Cart</button>
+        <button onclick="showPage('reservationPage', this)">Reservations</button>
+        <button onclick="showPage('analyticsPage', this)">Analytics</button>
+    </nav>
+</header>
+
+<main>
+    <!-- MENU PAGE -->
+    <section id="menuPage" class="page active">
+        <h2>Smart Menu</h2>
+        <p style="margin-bottom: 4px;">AI-ready menu with popular Gulf and Indian dishes.</p>
+        <small>Tip: Add items to cart, then place an order to see analytics update in real time.</small>
+        <div id="menuGrid" class="menu-grid"></div>
+    </section>
+
+    <!-- CART PAGE -->
+    <section id="cartPage" class="page">
+        <h2>Your Cart</h2>
+        <div class="cart-container">
+            <div id="cartItems"></div>
+            <div class="cart-summary">
+                <div><b>Total:</b> AED <span id="cartTotal">0</span></div>
+                <button class="primary-btn" id="placeOrderBtn" onclick="placeOrder()" disabled>
+                    Place Order
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESERVATIONS PAGE -->
+    <section id="reservationPage" class="page">
+        <h2>Table Reservations</h2>
+        <div class="reservation-layout">
+            <div class="card">
+                <h3>New Reservation</h3>
+                <div class="reservation-form">
+                    <input id="resName" type="text" placeholder="Full Name">
+                    <input id="resDate" type="date">
+                    <input id="resTime" type="time">
+                    <input id="resSize" type="number" min="1" placeholder="Party Size">
+                    <button onclick="submitReservation()">Confirm Reservation</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Upcoming Reservations</h3>
+                <div id="reservationList"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ANALYTICS PAGE -->
+    <section id="analyticsPage" class="page">
+        <h2>Analytics Dashboard</h2>
+        <p>Simple KPIs from the in-memory SRMS backend. this maps to your ML/CF pipeline.</p>
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <h3>Total Orders</h3>
+                <p id="analyticsOrders">0</p>
+            </div>
+            <div class="analytics-card">
+                <h3>Total Revenue (AED)</h3>
+                <p id="analyticsRevenue">0</p>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Top Selling Items</h3>
+            <ul id="analyticsList" class="analytics-list"></ul>
+        </div>
+    </section>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    const API_BASE = "http://127.0.0.1:5000";
+
+    let menuCache = [];
+    let cart = [];
+
+    // ---------- Helpers ----------
+    function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2200);
+    }
+
+    function showPage(pageId, btn) {
+        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+        document.getElementById(pageId).classList.add("active");
+
+        document.querySelectorAll("nav button").forEach(b => b.classList.remove("active-tab"));
+        if (btn) btn.classList.add("active-tab");
+
+        if (pageId === "reservationPage") {
+            loadReservations();
+        } else if (pageId === "analyticsPage") {
+            loadAnalytics();
+        }
+    }
+
+    // ---------- Backend Health ----------
+    async function checkHealth() {
+        const el = document.getElementById("healthStatus");
+        try {
+            const res = await fetch(`${API_BASE}/api/health`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            el.textContent = `Backend: ${data.status}`;
+            el.style.background = "rgba(76, 175, 80, 0.25)";
+        } catch {
+            el.textContent = "Backend: offline";
+            el.style.background = "rgba(229, 57, 53, 0.25)";
+        }
+    }
+
+    // ---------- MENU ----------
+    async function loadMenu() {
+        const grid = document.getElementById("menuGrid");
+        grid.innerHTML = "<p>Loading menu...</p>";
+        try {
+            const res = await fetch(`${API_BASE}/api/menu`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            menuCache = data.menu || [];
+
+            grid.innerHTML = "";
+            menuCache.forEach(item => {
+                grid.innerHTML += `
+                    <div class="menu-card">
+                        <img src="${item.img}" alt="${item.name}" />
+                        <div class="menu-card-body">
+                            <div class="menu-card-header">
+                                <div>
+                                    <strong>${item.name}</strong>
+                                </div>
+                                <span class="badge">AED ${item.price}</span>
+                            </div>
+                            <p>Popular choice for SRMS demo customers.</p>
+                            <button onclick="addToCart(${item.id})">Add to Cart</button>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (e) {
+            grid.innerHTML = "<p>Failed to load menu from backend.</p>";
+        }
+    }
+
+    function addToCart(id) {
+        const item = menuCache.find(m => m.id === id);
+        if (!item) return;
+        cart.push(item);
+        renderCart();
+        showToast(`${item.name} added to cart`);
+    }
+
+    function removeFromCart(i) {
+        cart.splice(i, 1);
+        renderCart();
+    }
+
+    function renderCart() {
+        const list = document.getElementById("cartItems");
+        const totalEl = document.getElementById("cartTotal");
+        const btn = document.getElementById("placeOrderBtn");
+
+        list.innerHTML = "";
+        let total = 0;
+
+        if (cart.length === 0) {
+            list.innerHTML = "<p>Your cart is empty.</p>";
+            totalEl.textContent = "0";
+            btn.disabled = true;
+            return;
+        }
+
+        cart.forEach((item, i) => {
+            total += item.price;
+            list.innerHTML += `
+                <div class="cart-item">
+                    <div>
+                        <div class="cart-item-title">${item.name}</div>
+                        <small>AED ${item.price}</small>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromCart(${i})">Remove</button>
+                </div>
+            `;
+        });
+
+        totalEl.textContent = total.toFixed(2);
+        btn.disabled = false;
+    }
+
+    // ---------- ORDERS ----------
+    async function placeOrder() {
+        if (cart.length === 0) return;
+        const btn = document.getElementById("placeOrderBtn");
+        btn.disabled = true;
+        btn.textContent = "Placing...";
+
+        try {
+            const res = await fetch(`${API_BASE}/api/orders`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    customer_name: "Walk-in Customer",
+                    items: cart
+                })
+            });
+
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            showToast(`Order #${data.id} placed (AED ${data.total.toFixed(2)})`);
+            cart = [];
+            renderCart();
+            loadAnalytics(); // update analytics
+        } catch (e) {
+            showToast("Failed to place order");
+        } finally {
+            btn.textContent = "Place Order";
+            btn.disabled = cart.length === 0;
+        }
+    }
+
+    // ---------- RESERVATIONS ----------
+    async function submitReservation() {
+        const name = document.getElementById("resName").value.trim();
+        const date = document.getElementById("resDate").value;
+        const time = document.getElementById("resTime").value;
+        const size = document.getElementById("resSize").value;
+
+        if (!name || !date || !time || !size) {
+            showToast("Fill all reservation fields");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/reservations`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, date, time, size: Number(size) })
+            });
+            if (!res.ok) throw new Error();
+            await res.json();
+            showToast("Reservation saved");
+            document.getElementById("resName").value = "";
+            document.getElementById("resDate").value = "";
+            document.getElementById("resTime").value = "";
+            document.getElementById("resSize").value = "";
+            loadReservations();
+        } catch (e) {
+            showToast("Failed to save reservation");
+        }
+    }
+
+    async function loadReservations() {
+        const list = document.getElementById("reservationList");
+        list.innerHTML = "<p>Loading...</p>";
+        try {
+            const res = await fetch(`${API_BASE}/api/reservations`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            const reservations = data.reservations || [];
+
+            if (reservations.length === 0) {
+                list.innerHTML = "<p>No reservations yet.</p>";
+                return;
+            }
+
+            list.innerHTML = "";
+            reservations.forEach(r => {
+                list.innerHTML += `
+                    <div class="reservation-entry">
+                        <b>${r.name}</b><br>
+                        ${r.date} at ${r.time}<br>
+                        Party of ${r.size}
+                    </div>
+                `;
+            });
+        } catch {
+            list.innerHTML = "<p>Failed to load reservations.</p>";
+        }
+    }
+
+    // ---------- ANALYTICS ----------
+    async function loadAnalytics() {
+        const ordersEl = document.getElementById("analyticsOrders");
+        const revenueEl = document.getElementById("analyticsRevenue");
+        const list = document.getElementById("analyticsList");
+
+        ordersEl.textContent = "...";
+        revenueEl.textContent = "...";
+        list.innerHTML = "<li>Loading...</li>";
+
+        try {
+            const res = await fetch(`${API_BASE}/api/analytics`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            ordersEl.textContent = data.total_orders;
+            revenueEl.textContent = data.total_revenue.toFixed(2);
+
+            list.innerHTML = "";
+            if (!data.top_items || data.top_items.length === 0) {
+                list.innerHTML = "<li>No orders yet.</li>";
+            } else {
+                data.top_items.forEach(t => {
+                    list.innerHTML += `<li>${t.name} — ${t.count} orders</li>`;
+                });
+            }
+        } catch {
+            list.innerHTML = "<li>Failed to load analytics.</li>";
+        }
+    }
+
+    // ---------- INIT ----------
+    window.addEventListener("load", () => {
+        checkHealth();
+        loadMenu();
+        renderCart();
+    });
+</script>
+
+</body>
+</html>

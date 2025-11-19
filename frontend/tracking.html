@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Track Your Order</title>
+<style>
+body { font-family: Arial; padding: 25px; text-align: center; }
+.step {
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    background: #eee;
+}
+.active { background: #4caf50; color: white; }
+</style>
+</head>
+
+<body>
+
+<h1>Order Tracking</h1>
+<input id="oid" placeholder="Enter Order ID" style="padding:8px">
+<button onclick="load()">Track</button>
+
+<div id="steps"></div>
+
+<script>
+function load() {
+    let id = document.getElementById("oid").value;
+    if (!id) return;
+
+    fetch(`http://127.0.0.1:5000/api/orders/${id}`)
+        .then(r => r.json())
+        .then(d => render(d));
+}
+
+function render(o) {
+    const statuses = [
+        "RECEIVED",
+        "PREPARING",
+        "READY",
+        "OUT_FOR_DELIVERY",
+        "COMPLETED"
+    ];
+    const div = document.getElementById("steps");
+    div.innerHTML = "";
+
+    statuses.forEach(st => {
+        div.innerHTML += `<div class="step ${o.status === st ? 'active' : ''}">${st}</div>`;
+    });
+}
+
+setInterval(load, 3000);
+</script>
+
+</body>
+</html>

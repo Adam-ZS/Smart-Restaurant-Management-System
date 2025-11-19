@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KDS – Kitchen Display System</title>
+<style>
+body {
+    margin: 0;
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+header {
+    background: #c62828;
+    padding: 20px;
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+}
+.order-list {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px;
+}
+.order-card {
+    background: #222;
+    border: 2px solid #444;
+    border-radius: 10px;
+    width: 300px;
+    margin: 10px;
+    padding: 15px;
+}
+.order-card h3 {
+    color: #ffeb3b;
+}
+.btn {
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 15px;
+}
+.prep { background: #1565c0; }
+.ready { background: #2e7d32; }
+</style>
+</head>
+
+<body>
+
+<header>Kitchen Display System (KDS)</header>
+
+<div class="order-list" id="orders"></div>
+
+<script>
+function loadOrders() {
+    fetch("http://127.0.0.1:5000/api/kitchen/queue")
+        .then(r => r.json())
+        .then(data => {
+            const out = document.getElementById("orders");
+            out.innerHTML = "";
+
+            data.orders.forEach(order => {
+                let html = `
+                    <div class="order-card">
+                        <h3>Order #${order.id}</h3>
+                        <p><b>Type:</b> ${order.type}</p>
+                        <p><b>Status:</b> ${order.status}</p>
+                        <ul>
+                            ${order.items.map(i => `<li>${i.qty}× ${i.name}</li>`).join("")}
+                        </ul>
+                        ${renderButton(order)}
+                    </div>
+                `;
+                out.innerHTML += html;
+            });
+        });
+}
+
+function renderButton(order) {
+    if (order.status === "RECEIVED")
+        return `<div class="btn prep" onclick="updateStatus(${order.id}, 'PREPARING')">Start Preparing</div>`;
+
+    if (order.status === "PREPARING")
+        return `<div class="btn ready" onclick="updateStatus(${order.id}, 'READY')">Mark Ready</div>`;
+
+    return "";
+}
+
+function updateStatus(id, status) {
+    fetch(`http://127.0.0.1:5000/api/orders/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+    }).then(() => loadOrders());
+}
+
+setInterval(loadOrders, 3000);
+loadOrders();
+</script>
+</body>
+</html>
