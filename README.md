@@ -1,4 +1,4 @@
-# 🍽️ Smart Restaurant Management System (SRMS) - Prototype v1.0
+<img width="1172" height="680" alt="image" src="https://github.com/user-attachments/assets/ac474215-08a8-4247-9387-dc1c218527f2" /># 🍽️ Smart Restaurant Management System (SRMS) - Prototype v1.0
 
 **A unified, simulated full-stack management system for restaurant operations.**
 
@@ -17,6 +17,15 @@ This prototype implements core functionalities—Menu, Cart, Reservations, and S
 * **Frontend**: Native JavaScript (ES6+), HTML5, CSS3.
 * **Backend**: Python 3.x, Flask (for API handling), Flask-CORS.
 * **Data**: In-memory Python data structures (simulating a database).
+<img width="1902" height="877" alt="image" src="https://github.com/user-attachments/assets/60aba38f-8c7a-473b-8525-cef5539e7e8c" />
+<img width="345" height="304" alt="image" src="https://github.com/user-attachments/assets/95ae08a6-8916-4826-b693-a84b8a17b080" />
+<img width="1172" height="680" alt="image" src="https://github.com/user-attachments/assets/79bcc3f5-0096-4a5e-a3d6-c88d98e85823" />
+<img width="738" height="472" alt="image" src="https://github.com/user-attachments/assets/70ef43de-585a-4aa4-bdd6-f1459fc0534c" />
+<img width="852" height="381" alt="image" src="https://github.com/user-attachments/assets/c5b50807-a240-4d73-b4e9-44adff1c75c4" />
+
+
+
+
 
 ## 🛠️ Getting Started (Run Locally)
 
