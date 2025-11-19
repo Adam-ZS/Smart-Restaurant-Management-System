@@ -1,4 +1,4 @@
-<img width="1172" height="680" alt="image" src="https://github.com/user-attachments/assets/ac474215-08a8-4247-9387-dc1c218527f2" /># 🍽️ Smart Restaurant Management System (SRMS) - Prototype v1.0
+# 🍽️ Smart Restaurant Management System (SRMS) - Prototype v1.0
 
 **A unified, simulated full-stack management system for restaurant operations.**
 
@@ -22,7 +22,7 @@ This prototype implements core functionalities—Menu, Cart, Reservations, and S
 <img width="1172" height="680" alt="image" src="https://github.com/user-attachments/assets/79bcc3f5-0096-4a5e-a3d6-c88d98e85823" />
 <img width="738" height="472" alt="image" src="https://github.com/user-attachments/assets/70ef43de-585a-4aa4-bdd6-f1459fc0534c" />
 <img width="852" height="381" alt="image" src="https://github.com/user-attachments/assets/c5b50807-a240-4d73-b4e9-44adff1c75c4" />
-
+<img width="1172" height="680" alt="image" src="https://github.com/user-attachments/assets/ac474215-08a8-4247-9387-dc1c218527f2" />
 
 
 
